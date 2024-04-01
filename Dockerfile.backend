@@ -1,0 +1,16 @@
+# Base stage for shared environment setup
+FROM python:3.9-slim as base
+WORKDIR /app
+COPY ./backend/requirements.txt /app/
+RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY ./backend /app/
+
+# Development stage adds development tools and configurations
+FROM base as development
+ENV DEBUG=1
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# Production stage for running with gunicorn
+FROM base as production
+ENV DEBUG=0
+CMD ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]
