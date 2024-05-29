@@ -1,23 +1,50 @@
-version: "3.8"
-services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-      target: development # Change to `production` for production
-    environment:
-      - DJANGO_SETTINGS_MODULE=myproject.settings.dev # Change as needed
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
+version: '3.8'
 
+services:
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
-      target: development # Change to `production` for production
+      context: ./client
     ports:
-      - "3000:3000"
+      - '3000:3000'
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+  backend:
+    build:
+      context: ./backend
     volumes:
-      - ./frontend:/app
+      - ./backend:/app
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - frontend
+      - backend
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
