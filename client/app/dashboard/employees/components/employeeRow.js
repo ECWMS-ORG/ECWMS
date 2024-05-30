@@ -37,7 +37,7 @@ export const EmployeeRow = ({ employee, onDelete }) => {
           <FilePlus className="w-5 h-5" />
           <span className="sr-only">Edit</span>
         </Button>
-        <Button size="icon" variant="ghost" onClick={handleDelete}>
+        <Button size="icon" variant="ghost" onClick={handleDelete} disabled={employee.position === "HR Specialist"}>
           <Trash2 className="w-5 h-5" />
           <span className="sr-only">Delete</span>
         </Button>
